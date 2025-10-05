@@ -23,5 +23,6 @@ class UserProfile:
     deletedBy: Optional[str] = None
     deletedAt: Optional[datetime] = None
     
-    
+    # Roles
+    is_Admin: bool = False
     
