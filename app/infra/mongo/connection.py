@@ -40,3 +40,7 @@ class MongoDBProvider:
         
         except PyMongoError as e:
             raise DataBaseError("Erro ao desconectar do MongoDB", meta={"details": str(e)}) from e
+        
+        
+    def get_collection(self, collection_name: str):
+        return self.get_db()[collection_name]
