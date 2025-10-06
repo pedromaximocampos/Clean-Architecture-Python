@@ -1,8 +1,8 @@
-from app.infra.mongo.settings import MongoSettings
+from src.infra.mongo.settings import MongoSettings
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 from pymongo.database import Database
-from app.api.advices.apiError import DataBaseError
+from src.api.advices.apiError import DataBaseError
 from typing import Optional
 
 class MongoDBProvider:

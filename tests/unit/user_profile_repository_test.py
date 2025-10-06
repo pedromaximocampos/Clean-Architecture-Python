@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock
 import pytest
-from app.infra.repositories.mongo.user_profile_repository import MongoUserProfileRepository
+from src.infra.mongo.repositories.mongo_user_profile_repository import MongoUserProfileRepository
 from datetime import datetime
-from app.infra.mongo.mappers.user_profile_mapper import UserProfileMapper
+from src.infra.mongo.mappers.user_profile_mapper import UserProfileMapper
 from bson import ObjectId
 
 
@@ -21,7 +21,7 @@ class TestUserProfileRepository:
     
     @pytest.fixture
     def setup_mock_user(self):
-        from app.domain.entities.user_profile_domain_entity import UserProfile
+        from src.domain.entities.user_profile import UserProfile
         mocked_user =  UserProfile(
             id="",
             email="user123@example.com",

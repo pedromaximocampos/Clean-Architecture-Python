@@ -1,6 +1,6 @@
 import pytest
-from app.infra.mongo.connection import MongoDBProvider
-from app.infra.mongo.settings import MongoSettings
+from src.infra.mongo.connection import MongoDBProvider
+from src.infra.mongo.settings import MongoSettings
 
 @pytest.mark.integration
 class TestMongoProviderIntegration:

@@ -1,4 +1,4 @@
-from app.domain.entities.user_profile_domain_entity import UserProfile
+from src.domain.entities.user_profile import UserProfile as UserProfileEntity
 from typing import Mapping, Any, Dict, Optional
 from bson import ObjectId
 
@@ -6,8 +6,8 @@ from bson import ObjectId
 class UserProfileMapper:
     
     @staticmethod
-    def from_document(document: dict) -> UserProfile:
-        return UserProfile(
+    def from_document(document: dict) -> UserProfileEntity:
+        return UserProfileEntity(
             id=str(document['_id']),
             email=document['email'],
             canAccessSensitiveInformation=document.get('canAccessSensitiveInformation', False),
@@ -22,7 +22,7 @@ class UserProfileMapper:
         )
         
     @staticmethod
-    def to_document(user_profile: UserProfile) -> Dict[str, Any]:
+    def to_document(user_profile: UserProfileEntity) -> Dict[str, Any]:
         # NÃO colocamos _id aqui — Mongo gera sozinho no insert
         doc: Dict[str, Any] = {
             "email": user_profile.email,
@@ -36,5 +36,6 @@ class UserProfileMapper:
             "deletedBy": user_profile.deletedBy,
             "deletedAt": user_profile.deletedAt
         }
+        doc.pop("id", None)  # remove id se existir
         # remove None para não gravar null
         return {k: v for k, v in doc.items() if v is not None}
