@@ -1,6 +1,6 @@
-from src.api.http_types.http_request import HttpRequest
-from src.api.http_types.http_response import HttpResponse
-from src.api.interfaces.controller_interface import IControllerInterface
+from src.data.http_types.http_request import HttpRequest
+from src.data.http_types.http_response import HttpResponse
+from src.data.interfaces.controller_interface import IControllerInterface
 from src.domain.use_cases.user_profile.create import ICreateUserProfile
 from src.domain.use_cases.user_profile.create import CreateUserProfileInput, CreateUserProfileOutput
 
@@ -12,10 +12,12 @@ class CreateUserProfileController(IControllerInterface):
         user_profile_input = self.create_user_profile_input_from_dict(request.body)
         created_user_profile = self.create_user_profile_use_case.execute(user_profile_input)
 
-        data_dict = self.return_user_output_as_dict(created_user_profile)
+
         return HttpResponse(
             status_code=201,
-            body=data_dict
+            body={
+                "data": self.return_user_output_as_dict(created_user_profile)
+            }
         )
 
     @classmethod

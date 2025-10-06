@@ -6,7 +6,7 @@ from src.domain.repositories.user_profile_repository import IUserProfileReposito
 from tests.unit.double.mongo_user_profile_repository_spy import MongoUserProfileRepositorySpy as Repository
 from src.domain.use_cases.user_profile.create import CreateUserProfileInput, CreateUserProfileOutput
 from src.application.use_cases.user_profile_cases.create import CreateUserProfileUseCase
-from src.api.advices.apiError import BadRequest
+from src.data.advices.apiError import BadRequest
 
 
 @pytest.mark.unit

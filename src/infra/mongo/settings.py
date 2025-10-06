@@ -6,4 +6,4 @@ class MongoSettings:
     db_name: str            # ex: "mydb"
     tls: bool = True
     server_selection_timeout_ms: int = 5000
-    app_name: str = "gmon-api"
+    app_name: str = "gmon-data"

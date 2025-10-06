@@ -1,6 +1,6 @@
 from flask import jsonify, request, g
 from werkzeug.exceptions import HTTPException
-from src.api.advices.apiError import ApiError
+from src.data.advices.apiError import ApiError
 import traceback, sys
 from uuid import uuid4
 

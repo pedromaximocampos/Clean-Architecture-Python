@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from src.api.http_types.http_request import HttpRequest
-from src.api.http_types.http_response import HttpResponse
+from src.data.http_types.http_request import HttpRequest
+from src.data.http_types.http_response import HttpResponse
 
 class IControllerInterface(ABC):
 
