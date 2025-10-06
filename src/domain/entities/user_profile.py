@@ -1,8 +1,7 @@
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from typing import Optional
-def now_utc() -> datetime:
-    return datetime.now(timezone.utc)
+from src.shared.utils import UtilsMethods
 
 @dataclass(frozen=True)
 class UserProfile:
@@ -13,7 +12,7 @@ class UserProfile:
     authorized_by: Optional[str] = None
     authorized_at: Optional[datetime] = None
     
-    # Permissoes
+    # Permissões
     can_access_sensitive_information: bool = False
     can_use_ai_agent: bool = False
     
@@ -40,7 +39,7 @@ class UserProfile:
                 raise ValueError(f"Campo inválido para atualização: {k}")
 
         new_fields = dict(kwargs)
-        new_fields["updated_at"] = now_utc()
+        new_fields["updated_at"] = UtilsMethods.now_utc()
         new_fields["updated_by"] = by
         return replace(self, **new_fields)
 
@@ -48,12 +47,12 @@ class UserProfile:
         # autorizar apenas se ainda não autorizado (opcional)
         if self.authorized_at is not None:
             return self
-        return replace(self, authorized_by=by, authorized_at=now_utc())
+        return replace(self, authorized_by=by, authorized_at=UtilsMethods.now_utc())
 
     def deactivate(self, by: str):
         if self.deleted_at is not None:
             raise ValueError("Usuário já foi desativado.")
-        t = now_utc()
+        t = UtilsMethods.now_utc()
         return replace(
             self,
             deleted_at=t,
@@ -65,7 +64,7 @@ class UserProfile:
     def restore(self, by: str):
         if self.deleted_at is None:
             raise ValueError("Usuário já está ativo.")
-        t = now_utc()
+        t = UtilsMethods.now_utc()
         return replace(
             self,
             deleted_at=None,
