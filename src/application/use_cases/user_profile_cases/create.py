@@ -12,16 +12,12 @@ class CreateUserProfileUseCase(ICreateUserProfile):
 
     def execute(self, userDataInput: CreateUserProfileInput) -> CreateUserProfileOutput:
         # Business logic for creating a user profile
-        try:
-            new_user_profile = UserProfile(
-                id = None,
-                email=userDataInput.email,
-                can_access_sensitive_information=userDataInput.can_access_sensitive_information,
-                can_use_ai_agent=userDataInput.can_use_ai_agent,
-                authorized_by="system"
-            )
 
-            authorized_user = new_user_profile.authorize("system")  # Exemplo: sistema autoriza
+        new_user_profile: UserProfile = self._create_user_profile_entity(userDataInput)
+
+        authorized_user: UserProfile = new_user_profile.authorize("system")  # Exemplo: sistema autoriza
+
+        try:
 
             user_profile = self.user_profile_repository.insert(authorized_user)
 
@@ -29,7 +25,24 @@ class CreateUserProfileUseCase(ICreateUserProfile):
             raise BadRequest(f"Não é possível criar o perfil do usuário. com email {userDataInput.email}."
                              f" Usuário já ativo no sistema") from e
 
-        created_output = CreateUserProfileOutput(
+        user_profile_output: CreateUserProfileOutput = self._create_user_profile_output(user_profile)
+
+        return user_profile_output
+
+
+    @classmethod
+    def _create_user_profile_entity(cls, userDataInput: CreateUserProfileInput) -> UserProfile:
+        return UserProfile(
+            id = None,
+            email=userDataInput.email,
+            can_access_sensitive_information=userDataInput.can_access_sensitive_information,
+            can_use_ai_agent=userDataInput.can_use_ai_agent,
+        )
+
+
+    @classmethod
+    def _create_user_profile_output(cls, user_profile: UserProfile) -> CreateUserProfileOutput:
+        return CreateUserProfileOutput(
             id = user_profile.id,
             email= user_profile.email,
             can_access_sensitive_information= user_profile.can_access_sensitive_information,
@@ -40,4 +53,3 @@ class CreateUserProfileUseCase(ICreateUserProfile):
             updated_by= user_profile.updated_by,
             updated_at= user_profile.updated_at
         )
-        return created_output
