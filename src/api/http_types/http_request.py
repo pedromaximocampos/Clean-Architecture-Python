@@ -1,0 +1,13 @@
+
+
+
+class HttpRequest:
+    def __init__(self, method: str, url: str, headers: dict = None, body: dict = None, query_params: dict = None):
+        self.method = method
+        self.url = url
+        self.headers = headers if headers is not None else {}
+        self.body = body
+        self.query_params = query_params if query_params is not None else {}
+
+    def __repr__(self):
+        return f"HttpRequest(method={self.method}, url={self.url}, headers={self.headers}, body={self.body})"
