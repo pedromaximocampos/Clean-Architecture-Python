@@ -9,7 +9,7 @@ class UtilsMethods:
         return datetime.now(timezone.utc)
     
     @staticmethod
-    def _to_oid(value: str | ObjectId) -> ObjectId:
+    def to_oid(value: str | ObjectId) -> ObjectId:
         if isinstance(value, ObjectId):
             return value
         try:

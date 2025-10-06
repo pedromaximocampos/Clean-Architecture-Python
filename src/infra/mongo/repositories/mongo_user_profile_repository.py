@@ -8,6 +8,7 @@ from pymongo.errors import DuplicateKeyError
 
 from src.domain.repositories.user_profile_repository import IUserProfileRepository
 from src.domain.entities.user_profile import UserProfile as UserProfileEntity
+from src.infra.mongo.connection import MongoDBProvider
 from src.infra.mongo.mappers.user_profile_mapper import UserProfileMapper
 
 from src.shared.custom_exceptions import UniqueViolation
@@ -27,7 +28,7 @@ class MongoUserProfileRepository(IUserProfileRepository):
     _COL_NAME = "UserProfile"
     _ACTIVE_FILTER = {"deletedAt": None}
 
-    def __init__(self, db_provider) -> None:
+    def __init__(self, db_provider: MongoDBProvider) -> None:
         self._col: Collection = db_provider.get_collection(self._COL_NAME)
         # Índices unico parcial
         self._col.create_index(
@@ -39,7 +40,7 @@ class MongoUserProfileRepository(IUserProfileRepository):
 
     # ---------- contrato ----------
     def find_by_id(self, user_id: str) -> Optional[UserProfileEntity]:
-        oid = UtilsMethods._to_oid(user_id)
+        oid = UtilsMethods.to_oid(user_id)
         doc = self._col.find_one({"_id": oid, **self._ACTIVE_FILTER})
         return UserProfileMapper.from_document(doc) if doc else None
 
@@ -61,7 +62,7 @@ class MongoUserProfileRepository(IUserProfileRepository):
     def save(self, user: UserProfileEntity) -> UserProfileEntity:
         if not user.id:
             raise ValueError("User must have a valid id to be saved.")
-        oid = UtilsMethods._to_oid(user.id)
+        oid = UtilsMethods.to_oid(user.id)
         doc = UserProfileMapper.to_document(user)
         try:
             self._col.update_one({"_id": oid, **self._ACTIVE_FILTER}, {"$set": doc})
@@ -79,7 +80,7 @@ class MongoUserProfileRepository(IUserProfileRepository):
 
 
     def soft_delete(self, user_id: str, *, by: str) -> None:
-        oid = UtilsMethods._to_oid(user_id)
+        oid = UtilsMethods.to_oid(user_id)
         t = UtilsMethods.now_utc()
         self._col.update_one(
             {"_id": oid, **self._ACTIVE_FILTER},
@@ -90,7 +91,7 @@ class MongoUserProfileRepository(IUserProfileRepository):
     def restore(self, user_id: str, *, by: str) -> None:
         # Pode falhar por unicidade se já houver outro ativo com o mesmo email.
         try:
-            oid = UtilsMethods._to_oid(user_id)
+            oid = UtilsMethods.to_oid(user_id)
             t = UtilsMethods.now_utc()
             self._col.update_one(
                 {"_id": oid, "deletedAt": {"$ne": None}},
@@ -101,7 +102,7 @@ class MongoUserProfileRepository(IUserProfileRepository):
 
 
     def mark_as_saved_in_bigquery(self, user_ids: Iterable[str]) -> None:
-        oids = [self._to_oid(uid) for uid in user_ids]
+        oids = [UtilsMethods.to_oid(uid) for uid in user_ids]
         if not oids:
             return
         self._col.update_many(

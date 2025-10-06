@@ -1,7 +1,6 @@
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from typing import Optional
-
 def now_utc() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -9,7 +8,6 @@ def now_utc() -> datetime:
 class UserProfile:
     id: Optional[str]
     email: str
-    name: str
 
     # Auditoria de liberação 
     authorized_by: Optional[str] = None
@@ -28,7 +26,7 @@ class UserProfile:
     updated_by: Optional[str] = None
 
     # Integração com BigQuery
-    saved_in_bigquery: bool = False
+    saved_in_big_query: bool = False
 
     def update(self, by: str, **kwargs):
         allowed = {

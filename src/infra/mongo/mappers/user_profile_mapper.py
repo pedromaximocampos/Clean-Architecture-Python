@@ -10,15 +10,15 @@ class UserProfileMapper:
         return UserProfileEntity(
             id=str(document['_id']),
             email=document['email'],
-            canAccessSensitiveInformation=document.get('canAccessSensitiveInformation', False),
-            canUseAiAgent=document.get('canUseAiAgent', False),
-            savedInBigQuery=document.get('savedInBigQuery', False),
-            authorizedBy=document["authorizedBy"],
-            authorizedAt=document["authorizedAt"],
-            updatedBy=document.get('updatedBy'),
-            updatedAt=document.get('updatedAt'),
-            deletedBy=document.get('deletedBy'),
-            deletedAt=document.get('deletedAt')
+            can_access_sensitive_information=document.get('canAccessSensitiveInformation', False),
+            can_use_ai_agent=document.get('canUseAiAgent', False),
+            saved_in_big_query=document.get('savedInBigQuery', False),
+            authorized_by=document["authorizedBy"],
+            authorized_at=document["authorizedAt"],
+            updated_by=document.get('updatedBy'),
+            updated_at=document.get('updatedAt'),
+            deleted_by=document.get('deletedBy'),
+            deleted_at=document.get('deletedAt')
         )
         
     @staticmethod
@@ -26,15 +26,15 @@ class UserProfileMapper:
         # NÃO colocamos _id aqui — Mongo gera sozinho no insert
         doc: Dict[str, Any] = {
             "email": user_profile.email,
-            "canAccessSensitiveInformation": user_profile.canAccessSensitiveInformation,
-            "canUseAiAgent": user_profile.canUseAiAgent,
-            "savedInBigQuery": user_profile.savedInBigQuery,
-            "authorizedBy": user_profile.authorizedBy,
-            "authorizedAt": user_profile.authorizedAt,
-            "updatedBy": user_profile.updatedBy,
-            "updatedAt": user_profile.updatedAt,
-            "deletedBy": user_profile.deletedBy,
-            "deletedAt": user_profile.deletedAt
+            "canAccessSensitiveInformation": user_profile.can_access_sensitive_information,
+            "canUseAiAgent": user_profile.can_use_ai_agent,
+            "savedInBigQuery": user_profile.saved_in_big_query,
+            "authorizedBy": user_profile.authorized_by,
+            "authorizedAt": user_profile.authorized_at,
+            "updatedBy": user_profile.updated_by,
+            "updatedAt": user_profile.updated_at,
+            "deletedBy": user_profile.deleted_by,
+            "deletedAt": user_profile.deleted_at
         }
         doc.pop("id", None)  # remove id se existir
         # remove None para não gravar null
