@@ -1,7 +1,7 @@
 from os import getenv
 
 
-DEV = getenv("ENVIRONMENT") != "production"
+DEV = getenv("FLASK_ENV") != "production"
 
 
 LOCAL_CONNECTION_STRING = getenv("LOCAL_CONNECTION_STRING")

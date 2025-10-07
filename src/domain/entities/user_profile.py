@@ -1,7 +1,7 @@
 from dataclasses import dataclass, replace
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Optional
-from src.shared.utils import UtilsMethods
+from src.application.shared.utils import UtilsMethods
 
 @dataclass(frozen=True)
 class UserProfile:

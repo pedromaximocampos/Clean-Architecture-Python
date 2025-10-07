@@ -1,8 +1,6 @@
 from __future__ import annotations
 from typing import Iterable, List, Optional
-from datetime import datetime, timezone
 
-from bson import ObjectId
 from pymongo.collection import Collection
 from pymongo.errors import DuplicateKeyError
 
@@ -11,9 +9,9 @@ from src.domain.entities.user_profile import UserProfile as UserProfileEntity
 from src.infra.mongo.connection import MongoDBProvider
 from src.infra.mongo.mappers.user_profile_mapper import UserProfileMapper
 
-from src.shared.custom_exceptions import UniqueViolation
+from src.data.shared.custom_exceptions import UniqueViolation
 
-from src.shared.utils import UtilsMethods
+from src.application.shared.utils import UtilsMethods
 
 class MongoUserProfileRepository(IUserProfileRepository):
     """

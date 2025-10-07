@@ -1,14 +1,16 @@
 from flask import jsonify, request, g
 from werkzeug.exceptions import HTTPException
-from src.data.advices.apiError import ApiError
+from src.main.server.advices.apiError import ApiError
 import traceback, sys
 from uuid import uuid4
+from src.config.settings import DEV
+
 
 class GlobalExceptionHandler:
     """
     Classe para registrar manipuladores globais de exceções no aplicativo Flask.
     """
-    developmentMode = True
+    developmentMode = DEV
     
     @staticmethod
     def register_error_handlers(app):

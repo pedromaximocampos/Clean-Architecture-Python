@@ -1,7 +1,7 @@
 from src.domain.use_cases.user_profile.create import ICreateUserProfile, CreateUserProfileOutput, CreateUserProfileInput
 from src.domain.entities.user_profile import UserProfile
-from src.shared.custom_exceptions import UniqueViolation
-from src.data.advices.apiError import BadRequest
+from src.data.shared.custom_exceptions import UniqueViolation
+from src.main.server.advices.apiError import BadRequest
 from src.domain.repositories.user_profile_repository import IUserProfileRepository
 
 

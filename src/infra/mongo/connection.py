@@ -4,7 +4,7 @@ from src.infra.mongo.settings import MongoSettings
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 from pymongo.database import Database
-from src.data.advices.apiError import DataBaseError
+from src.main.server.advices.apiError import DataBaseError
 from threading import Lock
 from typing import Optional
 
@@ -22,7 +22,7 @@ class MongoDBProvider:
     def client(self) -> MongoClient:
         if self._client is None:
             with self._lock:
-                 # Conexão única
+                 # Conexão única (lazy-connection) primeira requisicao estabelece a conexao com o MongoDB
                 if self._client is None and not self._connected_once:
                     self._client = MongoClient(
                         self._settings.connection_string,
@@ -34,7 +34,7 @@ class MongoDBProvider:
                     self._client.admin.command('ping')
 
                     logger.info("MongoDB conectado.")
-
+                    print("MongoDB conectado.")
                 except PyMongoError as e:
                     self._client = None
 
