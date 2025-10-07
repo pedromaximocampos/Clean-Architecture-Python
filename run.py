@@ -1,4 +1,4 @@
-from src.main.server.server import create_app
+from src.main.server.flask_server.server import create_app
 
 
 if __name__ == '__main__':

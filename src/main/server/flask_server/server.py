@@ -1,5 +1,5 @@
-from flask import Flask, request, jsonify
-from src.main.server.advices.globalExceptionHandler import GlobalExceptionHandler
+from flask import Flask
+from src.main.server.flask_server.advices.globalExceptionHandler import GlobalExceptionHandler
 from src.main.routes.user_profile_routes import user_profile_routes_bp
 
 def create_app():

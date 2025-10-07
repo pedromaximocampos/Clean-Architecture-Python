@@ -4,7 +4,7 @@ from src.infra.mongo.settings import MongoSettings
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 from pymongo.database import Database
-from src.main.server.advices.apiError import DataBaseError
+from src.main.server.flask_server.advices.apiError import DataBaseError
 from threading import Lock
 from typing import Optional
 
