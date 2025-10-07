@@ -4,7 +4,7 @@ from typing import Iterable, List, Optional
 from pymongo.collection import Collection
 from pymongo.errors import DuplicateKeyError
 
-from src.domain.repositories.user_profile_repository import IUserProfileRepository
+from src.domain.repositories_interfaces.user_profile_repository import IUserProfileRepository
 from src.domain.entities.user_profile import UserProfile as UserProfileEntity
 from src.infra.mongo.connection import MongoDBProvider
 from src.infra.mongo.mappers.user_profile_mapper import UserProfileMapper

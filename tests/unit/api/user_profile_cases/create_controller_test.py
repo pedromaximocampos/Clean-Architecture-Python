@@ -2,10 +2,10 @@ from datetime import datetime
 
 import pytest
 from unittest.mock import MagicMock, create_autospec
-from src.data.controllers.user_profile.create_controller import CreateUserProfileController
-from src.domain.use_cases.user_profile.create import ICreateUserProfile, CreateUserProfileOutput
-from src.data.http_types.http_request import HttpRequest
-from src.data.http_types.http_response import HttpResponse
+from src.application.controllers.user_profile.create_controller import CreateUserProfileController
+from src.domain.use_cases_interfaces.user_profile.create import ICreateUserProfile, CreateUserProfileOutput
+from src.application.http_types import HttpRequest
+from src.application.http_types import HttpResponse
 
 
 class TestCreateUserProfileController:

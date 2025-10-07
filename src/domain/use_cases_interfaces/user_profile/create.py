@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 
-from src.domain.repositories.user_profile_repository import IUserProfileRepository
+from src.domain.repositories_interfaces.user_profile_repository import IUserProfileRepository
 
 
 @dataclass
