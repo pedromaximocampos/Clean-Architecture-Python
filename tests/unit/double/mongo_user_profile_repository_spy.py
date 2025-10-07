@@ -1,7 +1,7 @@
 from typing import Iterable, List, Optional
 from uuid import uuid4
 from src.domain.entities.user_profile import UserProfile as UserProfileEntity, UserProfile
-from src.domain.repositories_interfaces.user_profile_repository import IUserProfileRepository
+from src.domain.ports.user_profile_repository import IUserProfileRepository
 
 
 class MongoUserProfileRepositorySpy(IUserProfileRepository):

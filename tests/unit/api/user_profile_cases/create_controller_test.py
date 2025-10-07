@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 from unittest.mock import MagicMock, create_autospec
 from src.presentation.controllers.user_profile.create_controller import CreateUserProfileController
-from src.domain.use_cases_interfaces.user_profile.create import ICreateUserProfile, CreateUserProfileOutput
+from src.domain.use_cases.user_profile.create import ICreateUserProfile, CreateUserProfileOutput
 from src.presentation.http_types.http_request import HttpRequest
 from src.presentation.http_types.http_response import HttpResponse
 

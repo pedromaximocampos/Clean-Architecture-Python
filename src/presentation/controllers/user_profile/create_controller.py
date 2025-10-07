@@ -1,8 +1,9 @@
 from src.presentation.http_types.http_request import HttpRequest
 from src.presentation.http_types.http_response import HttpResponse
 from src.presentation.interfaces.controller_interface import IControllerInterface
-from src.domain.use_cases_interfaces.user_profile.create import ICreateUserProfile
-from src.domain.use_cases_interfaces.user_profile.create import CreateUserProfileInput, CreateUserProfileOutput
+from src.domain.use_cases.user_profile.create import ICreateUserProfile
+from src.domain.use_cases.models.create_user_profile_input import CreateUserProfileInput
+from src.domain.use_cases.models.create_user_profile_output import CreateUserProfileOutput
 
 
 class CreateUserProfileController(IControllerInterface):

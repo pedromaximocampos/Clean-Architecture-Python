@@ -1,8 +1,10 @@
-from src.domain.use_cases_interfaces.user_profile.create import ICreateUserProfile, CreateUserProfileOutput, CreateUserProfileInput
+from src.domain.use_cases.user_profile.create import ICreateUserProfile
+from src.domain.use_cases.models.create_user_profile_output import CreateUserProfileOutput
+from src.domain.use_cases.models.create_user_profile_input import CreateUserProfileInput
 from src.domain.entities.user_profile import UserProfile
 from src.exceptions.custom_exceptions import UniqueViolation
 from src.exceptions.apiError import BadRequest
-from src.domain.repositories_interfaces.user_profile_repository import IUserProfileRepository
+from src.domain.ports.user_profile_repository import IUserProfileRepository
 
 
 class CreateUserProfileUseCase(ICreateUserProfile):

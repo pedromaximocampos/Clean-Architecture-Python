@@ -2,9 +2,9 @@ from datetime import datetime
 from src.exceptions.custom_exceptions import UniqueViolation
 import pytest
 from unittest.mock import create_autospec, MagicMock
-from src.domain.repositories_interfaces.user_profile_repository import IUserProfileRepository
+from src.domain.ports.user_profile_repository import IUserProfileRepository
 from tests.unit.double.mongo_user_profile_repository_spy import MongoUserProfileRepositorySpy as Repository
-from src.domain.use_cases_interfaces.user_profile.create import CreateUserProfileInput, CreateUserProfileOutput
+from src.domain.use_cases.user_profile.create import CreateUserProfileInput, CreateUserProfileOutput
 from src.application.use_cases_impl.user_profile_cases.create import CreateUserProfileUseCase
 from src.exceptions.apiError import BadRequest
 
