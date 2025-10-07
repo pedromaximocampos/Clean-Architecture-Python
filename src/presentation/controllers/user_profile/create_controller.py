@@ -17,7 +17,7 @@ class CreateUserProfileController(IControllerInterface):
         return HttpResponse(
             status_code=201,
             body={
-                "data": self.return_user_output_as_dict(created_user_profile)
+                "application": self.return_user_output_as_dict(created_user_profile)
             }
         )
 

@@ -9,7 +9,7 @@ gmon_settings = MongoSettings(
         db_name=LOCAL_DB_NAME,
         tls=False,
         server_selection_timeout_ms=5000,
-        app_name="gmon-data-dev",
+        app_name="gmon-application-dev",
     )
 
 gmon_provider = MongoDBProvider(gmon_settings)

@@ -9,9 +9,9 @@ from src.domain.entities.user_profile import UserProfile as UserProfileEntity
 from src.infra.mongo.connection import MongoDBProvider
 from src.infra.mongo.mappers.user_profile_mapper import UserProfileMapper
 
-from src.data.shared.custom_exceptions import UniqueViolation
+from src.exceptions.custom_exceptions import UniqueViolation
 
-from src.application.shared.utils import UtilsMethods
+from src.utils.utils import UtilsMethods
 
 class MongoUserProfileRepository(IUserProfileRepository):
     """
