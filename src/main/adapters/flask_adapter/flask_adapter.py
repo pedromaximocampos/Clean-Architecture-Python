@@ -1,7 +1,7 @@
 from flask import request as FlaskRequest
 from typing import Callable
-from src.application.http_types import HttpRequest
-from src.application.http_types import HttpResponse
+from src.presentation.http_types.http_request import HttpRequest
+from src.presentation.http_types.http_response import HttpResponse
 
 
 
