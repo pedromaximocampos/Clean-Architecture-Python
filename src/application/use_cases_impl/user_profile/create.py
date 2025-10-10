@@ -1,6 +1,6 @@
 from src.domain.use_cases.user_profile.create import ICreateUserProfile
-from src.domain.use_cases.models.create_user_profile_output import CreateUserProfileOutput
-from src.domain.use_cases.models.create_user_profile_input import CreateUserProfileInput
+from src.domain.use_cases.models.user_profile.create_user_profile_output import CreateUserProfileOutput
+from src.domain.use_cases.models.user_profile.create_user_profile_input import CreateUserProfileInput
 from src.domain.entities.user_profile import UserProfile
 from src.exceptions.custom_exceptions import UniqueViolation
 from src.exceptions.api_types import BadRequestError
@@ -52,6 +52,4 @@ class CreateUserProfileUseCase(ICreateUserProfile):
             saved_in_big_query= user_profile.saved_in_big_query,
             authorized_by= user_profile.authorized_by,
             authorized_at= user_profile.authorized_at,
-            updated_by= user_profile.updated_by,
-            updated_at= user_profile.updated_at
         )

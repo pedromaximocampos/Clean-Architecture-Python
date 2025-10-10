@@ -2,8 +2,8 @@ from src.presentation.http_types.http_request import HttpRequest
 from src.presentation.http_types.http_response import HttpResponse
 from src.presentation.interfaces.controller_interface import IControllerInterface
 from src.domain.use_cases.user_profile.create import ICreateUserProfile
-from src.domain.use_cases.models.create_user_profile_input import CreateUserProfileInput
-from src.domain.use_cases.models.create_user_profile_output import CreateUserProfileOutput
+from src.domain.use_cases.models.user_profile.create_user_profile_input import CreateUserProfileInput
+from src.domain.use_cases.models.user_profile.create_user_profile_output import CreateUserProfileOutput
 
 
 class CreateUserProfileController(IControllerInterface):
@@ -18,7 +18,7 @@ class CreateUserProfileController(IControllerInterface):
         return HttpResponse(
             status_code=201,
             body={
-                "application": self.return_user_output_as_dict(created_user_profile)
+                "data": self.return_user_output_as_dict(created_user_profile)
             }
         )
 
@@ -42,6 +42,4 @@ class CreateUserProfileController(IControllerInterface):
             'saved_in_big_query': user_profile_output.saved_in_big_query,
             'authorized_by': user_profile_output.authorized_by,
             'authorized_at': user_profile_output.authorized_at.isoformat(),
-            'updated_by': user_profile_output.updated_by,
-            'updated_at': user_profile_output.updated_at.isoformat() if user_profile_output.updated_at else None
         }

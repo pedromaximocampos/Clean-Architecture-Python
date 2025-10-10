@@ -10,5 +10,3 @@ class CreateUserProfileOutput:
     saved_in_big_query: bool
     authorized_by: str
     authorized_at: datetime
-    updated_by: str = None
-    updated_at: datetime = None
