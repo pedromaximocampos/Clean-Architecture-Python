@@ -7,4 +7,4 @@ class ValidationFailed(Exception):
         super().__init__()
         self.message = message
         self.status_code = 422
-        self.name = "Validation Failed"
+        self.name = "unprocessable Entity"

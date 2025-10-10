@@ -3,7 +3,7 @@ from src.domain.use_cases.models.create_user_profile_output import CreateUserPro
 from src.domain.use_cases.models.create_user_profile_input import CreateUserProfileInput
 from src.domain.entities.user_profile import UserProfile
 from src.exceptions.custom_exceptions import UniqueViolation
-from src.exceptions.apiError import BadRequest
+from src.exceptions.api_types import BadRequestError
 from src.domain.ports.user_profile_repository import IUserProfileRepository
 
 
@@ -24,7 +24,7 @@ class CreateUserProfileUseCase(ICreateUserProfile):
             user_profile = self.user_profile_repository.insert(authorized_user)
 
         except UniqueViolation as e:
-            raise BadRequest(f"Não é possível criar o perfil do usuário. com email {userDataInput.email}."
+            raise BadRequestError(f"Não é possível criar o perfil do usuário. com email {userDataInput.email}."
                              f" Usuário já ativo no sistema") from e
 
         user_profile_output: CreateUserProfileOutput = self._create_user_profile_output(user_profile)

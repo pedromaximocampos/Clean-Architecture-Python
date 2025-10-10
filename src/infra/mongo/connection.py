@@ -4,7 +4,7 @@ from src.infra.mongo.settings import MongoSettings
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 from pymongo.database import Database
-from src.exceptions.apiError import DataBaseError
+from src.exceptions.api_types.database_error import DatabaseError
 from threading import Lock
 from typing import Optional
 
@@ -39,7 +39,7 @@ class MongoDBProvider:
                     self._client = None
 
                     logger.error("erro ao conectar ao MongoDB")
-                    raise DataBaseError("Erro ao conectar ao MongoDB", meta={"details": str(e)}) from e
+                    raise DatabaseError("Erro ao conectar ao MongoDB", meta={"details": str(e)}) from e
 
                 logging.info("conectado ao MongoDB")
                 self._connected_once = True
