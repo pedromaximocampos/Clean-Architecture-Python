@@ -1,4 +1,4 @@
-from src.domain.ports.user_profile_repository import IUserProfileRepository
+from src.domain.ports.repositories.user_profile_repository import IUserProfileRepository
 from src.domain.use_cases.user_profile.delete import IDeleteUserProfile
 from src.domain.entities.user_profile import UserProfile
 

@@ -3,7 +3,7 @@ from src.infra.mongo.repositories.mongo_user_profile_repository import MongoUser
 from src.presentation.controllers.user_profile.get_all_controller import GetAllUserProfilesController
 
 
-from src.infra.mongo.provider import get_providers
+from src.infra.mongo.providers import get_providers
 
 def user_profile_get_all_composable():
     gmon_provider = get_providers()

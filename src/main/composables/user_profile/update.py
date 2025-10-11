@@ -1,7 +1,7 @@
 from src.presentation.controllers.user_profile.update_controller import UpdateUserProfileController
 from src.infra.mongo.repositories.mongo_user_profile_repository import MongoUserProfileRepository
 from src.application.use_cases_impl.user_profile.update import UpdateUserProfileUseCase
-from src.infra.mongo.provider import get_providers
+from src.infra.mongo.providers import get_providers
 
 
 def user_profile_update_composable():

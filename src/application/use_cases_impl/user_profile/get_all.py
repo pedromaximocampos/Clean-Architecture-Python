@@ -1,5 +1,5 @@
 from src.domain.use_cases.user_profile.get_all import IGetAllUserProfiles
-from src.domain.ports.user_profile_repository import IUserProfileRepository
+from src.domain.ports.repositories.user_profile_repository import IUserProfileRepository
 
 from src.domain.use_cases.models.user_profile.get_all_output import GetUserProfileOutput
 from src.domain.entities.user_profile import UserProfile

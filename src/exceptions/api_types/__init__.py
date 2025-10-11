@@ -7,3 +7,4 @@ from .upgrade_error import UpgradeRequired
 from .user_is_not_admin import UserIsNotAdmin
 from .cache_error import CacheError
 from .validation_error import ValidationFailed
+from .forbidden_error import ForbiddenError

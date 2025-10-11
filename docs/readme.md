@@ -143,7 +143,7 @@ src/
 │       └── user_profile/
 │           └── create.py
 │
-├── data/                           # 📋 APLICAÇÃO - Casos de Uso
+├── application/                    # 📋 APLICAÇÃO - Casos de Uso
 │   ├── use_cases_impl/            # Implementação dos casos de uso
 │   │   └── user_profile_cases/
 │   │       └── create.py          # Orquestração da criação
@@ -170,7 +170,8 @@ src/
 │   └── interfaces/
 │       └── controller_interface.py
 │
-├── main/                         # 🚀 COMPOSIÇÃO - Injeção de Dependência
+├── main/                         # 🚀 COMPOSIÇÃO - Injeção de Dependência  
+|   |                  
 │   ├── server/                   # Configuração do servidor
 │   │   ├── server.py
 │   │   └── advices/              # Tratamento global de erros

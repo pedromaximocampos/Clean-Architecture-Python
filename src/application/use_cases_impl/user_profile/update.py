@@ -1,7 +1,7 @@
 from src.domain.use_cases.user_profile.update import IUpdateUserProfile
 from src.domain.use_cases.models.user_profile.update_user_profile_input import UpdateUserProfileInput
 from src.domain.use_cases.models.user_profile.update_user_profile_output import UpdateUserProfileOutput
-from src.domain.ports.user_profile_repository import IUserProfileRepository
+from src.domain.ports.repositories.user_profile_repository import IUserProfileRepository
 from src.domain.entities.user_profile import UserProfile
 
 from src.exceptions.api_types import NotFoundError

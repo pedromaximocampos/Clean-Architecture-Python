@@ -4,7 +4,7 @@ from src.domain.use_cases.models.user_profile.create_user_profile_input import C
 from src.domain.entities.user_profile import UserProfile
 from src.exceptions.custom_exceptions import UniqueViolation
 from src.exceptions.api_types import BadRequestError
-from src.domain.ports.user_profile_repository import IUserProfileRepository
+from src.domain.ports.repositories.user_profile_repository import IUserProfileRepository
 
 
 class CreateUserProfileUseCase(ICreateUserProfile):

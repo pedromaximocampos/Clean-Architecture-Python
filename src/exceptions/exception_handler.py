@@ -20,7 +20,8 @@ class ExceptionHandler:
         UpgradeRequired,
         DatabaseError,
         NotFoundError,
-        ValidationFailed
+        ValidationFailed,
+        ForbiddenError,
     )
 
     @staticmethod
