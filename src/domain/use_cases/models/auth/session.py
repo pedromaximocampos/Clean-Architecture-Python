@@ -12,3 +12,4 @@ class Session:
     companies: list[dict[str, str]]
     redes: list[str]
     user_profile: UserProfile
+    lbc_auth_token: str

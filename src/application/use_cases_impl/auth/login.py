@@ -15,6 +15,8 @@ from src.domain.use_cases.models.auth.session import Session
 
 from src.exceptions.api_types import ForbiddenError
 
+from src.config.settings import EXPIRATION_TIME_ACCESS_TOKEN, EXPIRATION_TIME_REFRESH_TOKEN
+
 class LoginUseCaseImpl(ILoginUseCase):
     def __init__(self, user_repository: IUserProfileRepository, session_repository: ISessionTokenRepository,
                  lbc_auth_client: ILBCAuthClient, token_service: ITokenService):
@@ -31,9 +33,9 @@ class LoginUseCaseImpl(ILoginUseCase):
 
         auth_response: LBCAuthOutput  = self._lbc_auth_client.authenticate(lbc_auth_input)
 
-        access_token =  self._token_service.create_access_token(auth_response.email)
+        access_token =  self._token_service.create_token(auth_response.email, EXPIRATION_TIME_ACCESS_TOKEN)
 
-        refresh_token = self._token_service.create_refresh_token(auth_response.email)
+        refresh_token = self._token_service.create_token(auth_response.email, EXPIRATION_TIME_REFRESH_TOKEN)
 
         user_profile: UserProfile = self._user_repository.find_by_email_active(auth_response.email)
 
@@ -78,4 +80,5 @@ class LoginUseCaseImpl(ILoginUseCase):
             companies=auth_response.companies,
             redes=auth_response.redes,
             user_profile=user_profile,
+            lbc_auth_token=auth_response.lbc_auth_token
         )

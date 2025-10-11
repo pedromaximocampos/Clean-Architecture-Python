@@ -15,28 +15,14 @@ class JWTTokenService(ITokenService):
         self._jwt_secret = jwt_secret
 
 
-    def create_access_token(self, subject: str) -> str:
+    def create_token(self, subject: str, expiration_time: int) -> str:
         salt = self.get_salt_token(subject)
 
         payload = {
             "sub": subject,
             "jti": salt,
             "iat": datetime.now(timezone.utc),
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=30), # Token válido por 15 minutos
-            "iss": "gmon-service",
-        }
-        token = jwt.encode(payload, self._jwt_secret, algorithm="HS256")
-
-        return token
-
-    def create_refresh_token(self, subject: str) -> str:
-        salt = self.get_salt_token(subject)
-
-        payload = {
-            "sub": subject,
-            "jti": salt,
-            "iat": datetime.now(timezone.utc),
-            "exp": datetime.now(timezone.utc) + timedelta(days=30),  # Token válido por 30 dias
+            "exp": expiration_time,
             "iss": "gmon-service",
         }
         token = jwt.encode(payload, self._jwt_secret, algorithm="HS256")
