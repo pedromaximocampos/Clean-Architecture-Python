@@ -23,7 +23,7 @@ class JWTTokenService(ITokenService):
             "sub": subject,
             "jti": salt,
             "iat": datetime.now(timezone.utc),
-            "exp": expiration_time,
+            "exp": datetime.now(timezone.utc) + timedelta(seconds=expiration_time),
             "iss": "gmon-service",
         }
         token = jwt.encode(payload, self._jwt_secret, algorithm="HS256")

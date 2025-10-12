@@ -61,8 +61,6 @@ class LoginUseCaseImpl(ILoginUseCase):
         )
 
 
-
-
     @classmethod
     def login_input_to_lbc_auth_input(cls, login: LoginInput) -> LBCAuthInput:
         return LBCAuthInput(

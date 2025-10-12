@@ -19,16 +19,12 @@ class RefreshController(IControllerInterface):
 
     def handle_request(self, request: HttpRequest) -> HttpResponse:
 
-        refresh_token = request.refresh_token
+        refresh_token = request.cookies.get("refresh-token")
         if not refresh_token:
             raise BadRequestError("Refresh Token is missing")
 
-        logged_user: UserPrincipal = get_current_user()
 
-        if not logged_user:
-            raise BadRequestError("Error getting current user")
-
-        refresh_input = RefreshInput(logged_user.email, refresh_token)
+        refresh_input = RefreshInput(refresh_token)
 
         refresh_output: RefreshOutput = self.refresh_use_case.execute(refresh_input)
 

@@ -2,8 +2,11 @@ from flask import request, abort
 
 from src.application.services.security.auth_guard_impl import AuthGuardImpl
 from src.domain.ports.security.auth_guard import IAuthGuard
+from src.domain.ports.security.models.user_principal import UserPrincipal
 
 from src.shared.contexts.current_user import set_current_user, clear_current_user
+
+from src.exceptions.api_types import AuthError
 
 
 
@@ -30,14 +33,14 @@ class FlaskAuthGuardAdapter:
 
         if not access_token or not refresh_token:
             clear_current_user()
-            abort(401, description="Unauthorized")
+            raise AuthError
 
         try:
-            principal = self.auth_guard.authenticate(access_token, refresh_token)
+            principal: UserPrincipal = self.auth_guard.authenticate(access_token, refresh_token)
             set_current_user(principal)
         except Exception:
             clear_current_user()
-            abort(401, description="Unauthorized")
+            raise AuthError
 
 
     def after_request(self, response):

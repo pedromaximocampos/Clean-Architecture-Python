@@ -40,7 +40,8 @@ class AuthRefreshUseCase(IAuthRefreshUseCase):
 
         new_session: Session = self.create_session(lbc_auth_response, user_profile)
 
-        self._session_repository.save(new_session, new_refresh_token)
+        self.replace_sessions(new_refresh_token=new_refresh_token, old_refresh_token=refresh.refresh_token,
+                              new_session=new_session)
 
         return RefreshOutput(
             access_token=new_access_token,
