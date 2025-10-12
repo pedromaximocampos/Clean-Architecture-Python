@@ -13,6 +13,8 @@ from src.exceptions.custom_exceptions import UniqueViolation
 
 from src.utils.utils import UtilsMethods
 
+from src.config.settings import CONST_USER_PROFILE_COLLECTION
+
 class MongoUserProfileRepository(IUserProfileRepository):
     """
     Repositório MongoDB para UserProfile.
@@ -23,7 +25,7 @@ class MongoUserProfileRepository(IUserProfileRepository):
     - Sempre retornar/aceitar UserProfile (domínio)
     """
 
-    _COL_NAME = "UserProfile"
+    _COL_NAME = CONST_USER_PROFILE_COLLECTION
     _ACTIVE_FILTER = {"deletedAt": None}
 
     def __init__(self, db_provider: MongoDBProvider) -> None:

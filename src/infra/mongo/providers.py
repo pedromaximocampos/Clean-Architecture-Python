@@ -14,5 +14,5 @@ gmon_settings = MongoSettings(
 
 gmon_provider = MongoDBProvider(gmon_settings)
 
-def get_providers() -> MongoDBProvider:
+def get_gmon_provider() -> MongoDBProvider:
     return gmon_provider

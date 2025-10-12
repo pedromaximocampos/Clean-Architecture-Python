@@ -3,6 +3,7 @@ from os import access
 from src.domain.entities.user_profile import UserProfile
 from src.domain.ports.repositories.user_profile_repository import IUserProfileRepository
 from src.domain.ports.repositories.session_token_repository import ISessionTokenRepository
+from src.domain.ports.repositories.admin_repository import IAdminUserRepository
 from src.domain.ports.security.token_service import ITokenService
 
 from src.domain.use_cases.auth.login import ILoginUseCase
@@ -19,19 +20,22 @@ from src.config.settings import EXPIRATION_TIME_ACCESS_TOKEN, EXPIRATION_TIME_RE
 
 class LoginUseCaseImpl(ILoginUseCase):
     def __init__(self, user_repository: IUserProfileRepository, session_repository: ISessionTokenRepository,
-                 lbc_auth_client: ILBCAuthClient, token_service: ITokenService):
+                 lbc_auth_client: ILBCAuthClient, token_service: ITokenService, admin_repository: IAdminUserRepository) -> None:
         self._user_repository = user_repository
         self._session_repository = session_repository
         self._lbc_auth_client = lbc_auth_client
         self._token_service = token_service
+        self._admin_repository = admin_repository
 
 
     def execute(self, login: LoginInput) -> LoginOutput:
-        """Realiza o login do usuário usando o username e password presentes no LBC Auth e retorna os dados do usuário."""
+        """Realiza o login do usuário usando o username e senha presentes no LBC Auth e retorna os dados do usuário."""
 
         lbc_auth_input: LBCAuthInput = self.login_input_to_lbc_auth_input(login)
 
         auth_response: LBCAuthOutput  = self._lbc_auth_client.authenticate(lbc_auth_input)
+
+        is_admin : bool = self._admin_repository.is_admin(lbc_auth_input.email)
 
         access_token =  self._token_service.create_token(auth_response.email, EXPIRATION_TIME_ACCESS_TOKEN)
 
@@ -56,7 +60,7 @@ class LoginUseCaseImpl(ILoginUseCase):
             ibms=auth_response.ibms,
             companies=auth_response.companies,
             redes=auth_response.redes,
-            is_admin= True,
+            is_admin= is_admin,
         )
 
 

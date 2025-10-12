@@ -33,7 +33,8 @@ class LoginController(IControllerInterface):
                 },
                 "redes": login_output.redes,
                 "companies": login_output.companies,
-                "ibms": login_output.ibms
+                "ibms": login_output.ibms,
+                "is_admin": login_output.is_admin
                 },
             headers={"refresh-token": login_output.refresh_token}
         )
