@@ -44,6 +44,7 @@ class RedisSessionRepository(ISessionTokenRepository):
         redis_pipeline.hset(token_refresh, "companies", json.dumps(session.companies))
         redis_pipeline.hset(token_refresh, "redes", json.dumps(session.redes))
         redis_pipeline.hset(token_refresh, "user_profile", user_profile_json)
+        redis_pipeline.hset(token_refresh, "lbc_auth_token", session.lbc_auth_token)
 
         tempo_de_expiracao = 60 * 60 * 24 * 30  # 30 dias em segundos
         tempo_de_expiracao += 120  # Adiciona 2 minutos extras para garantir que o token não expire exatamente no momento da verificação
@@ -102,6 +103,6 @@ class RedisSessionRepository(ISessionTokenRepository):
             companies=json.loads(user_data.get("companies")),
             redes=json.loads(user_data.get("redes")),
             user_profile=schemed_user_profile,
-            expires_in=self.redis_client.ttl(token_refresh)
+            lbc_auth_token=user_data.get("lbc_auth_token")
         )
 
