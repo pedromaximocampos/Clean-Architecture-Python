@@ -13,3 +13,9 @@ class ITokenService(ABC):
     def decode_token(self, token: str) -> dict:
         """Decodifica o token e retorna o payload."""
         raise NotImplementedError
+
+
+    @abstractmethod
+    def get_email_from_token(self, token: str) -> str:
+        """Extrai o email do token decodificado."""
+        raise NotImplementedError

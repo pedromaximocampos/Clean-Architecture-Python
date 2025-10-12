@@ -29,12 +29,13 @@ class LoginController(IControllerInterface):
                 "user": {
                         "name": login_output.name,
                         "email": login_output.email,
-                        "is_admin": login_output.is_admin
+                        "is_admin": login_output.is_admin,
+                        "can_access_sensitive_information": login_output.can_access_sensitive_information,
+                        "can_use_ai_agent": login_output.can_use_ai_agent
                 },
                 "redes": login_output.redes,
                 "companies": login_output.companies,
                 "ibms": login_output.ibms,
-                "is_admin": login_output.is_admin
                 },
             headers={"refresh-token": login_output.refresh_token}
         )

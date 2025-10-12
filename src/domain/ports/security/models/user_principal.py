@@ -1,12 +1,11 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Sequence
+
+from src.domain.entities.user_profile import UserProfile
 
 
-@dataclass
-class LoginOutput:
-    access_token: str
-    refresh_token: str
-
+@dataclass(frozen=True)
+class UserPrincipal:
     email: str
     name: str
 
@@ -14,7 +13,6 @@ class LoginOutput:
     ibms: list[str]
     redes: list[str]
 
-    is_admin: bool = False
-
-    can_access_sensitive_information: bool = False
     can_use_ai_agent: bool = False
+    can_access_sensitive_information: bool = False
+    is_admin: bool = False

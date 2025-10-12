@@ -31,15 +31,11 @@ class LoginUseCaseImpl(ILoginUseCase):
     def execute(self, login: LoginInput) -> LoginOutput:
         """Realiza o login do usuário usando o username e senha presentes no LBC Auth e retorna os dados do usuário."""
 
-        lbc_auth_input: LBCAuthInput = self.login_input_to_lbc_auth_input(login)
+        auth_response: LBCAuthOutput  = self.return_lbc_auth_response(login)
 
-        auth_response: LBCAuthOutput  = self._lbc_auth_client.authenticate(lbc_auth_input)
+        is_admin : bool = self._admin_repository.is_admin(auth_response.email)
 
-        is_admin : bool = self._admin_repository.is_admin(lbc_auth_input.email)
-
-        access_token =  self._token_service.create_token(auth_response.email, EXPIRATION_TIME_ACCESS_TOKEN)
-
-        refresh_token = self._token_service.create_token(auth_response.email, EXPIRATION_TIME_REFRESH_TOKEN)
+        access_token, refresh_token =  self.create_tokens(auth_response.email)
 
         user_profile: UserProfile = self._user_repository.find_by_email_active(auth_response.email)
 
@@ -50,7 +46,6 @@ class LoginUseCaseImpl(ILoginUseCase):
 
         self._session_repository.save(session, refresh_token)
 
-        # TODO:  verificar se é admin na outra collection
 
         return LoginOutput(
             access_token=access_token,
@@ -61,6 +56,8 @@ class LoginUseCaseImpl(ILoginUseCase):
             companies=auth_response.companies,
             redes=auth_response.redes,
             is_admin= is_admin,
+            can_access_sensitive_information= user_profile.can_access_sensitive_information,
+            can_use_ai_agent= user_profile.can_use_ai_agent,
         )
 
 
@@ -86,3 +83,18 @@ class LoginUseCaseImpl(ILoginUseCase):
             user_profile=user_profile,
             lbc_auth_token=auth_response.lbc_auth_token
         )
+
+    def return_lbc_auth_response(self, login: LoginInput) -> LBCAuthOutput:
+        """Retorna a resposta do LBC Auth para o login fornecido."""
+        lbc_auth_input: LBCAuthInput = self.login_input_to_lbc_auth_input(login)
+
+        auth_response: LBCAuthOutput  = self._lbc_auth_client.authenticate(lbc_auth_input)
+
+        return auth_response
+
+    def create_tokens(self, email: str) -> tuple[str, str]:
+        """Cria novos tokens de acesso e refresh."""
+        access_token = self._token_service.create_token(email, EXPIRATION_TIME_ACCESS_TOKEN)  # 15 minutos
+        refresh_token = self._token_service.create_token(email, EXPIRATION_TIME_REFRESH_TOKEN)  # 30 dias
+
+        return access_token, refresh_token

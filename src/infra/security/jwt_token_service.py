@@ -11,6 +11,7 @@ from src.exceptions.api_types import AuthError
 
 class JWTTokenService(ITokenService):
 
+
     def __init__(self, jwt_secret: str) -> None:
         self._jwt_secret = jwt_secret
 
@@ -44,6 +45,11 @@ class JWTTokenService(ITokenService):
 
         except Exception as e:
             raise AuthError("Token inválido ou expirado.") from e
+
+
+    def get_email_from_token(self, token: str) -> str:
+        decoded_token = self.decode_token(token)
+        return decoded_token.get("sub")
 
 
     @classmethod

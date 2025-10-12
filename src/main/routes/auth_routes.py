@@ -4,7 +4,7 @@ from flask import Blueprint, request, jsonify, make_response
 
 # Composables
 from src.main.composables.auth.login_composable import login_composable
-
+from src.main.composables.auth.refresh_composable import get_refresh_composable
 
 # Exception Handler
 from src.exceptions.exception_handler import ExceptionHandler
@@ -12,7 +12,7 @@ from src.exceptions.api_types import ValidationFailed
 
 # Validators
 from src.main.validators.auth_validators.login_validator import LoginValidator
-
+from src.main.validators.auth_validators.refresh_validator import RefreshValidator
 
 # Adapter (flask)
 from src.main.adapters.flask_adapter.flask_adapter import flask_adapter
@@ -50,3 +50,29 @@ def login():
         http_response = ExceptionHandler.handle_exception(e)
         return jsonify(http_response.body), http_response.status_code
 
+
+@auth_routes_bp.route('/auth/refresh', methods=['POST'])
+def refresh():
+    try:
+        controller_handle = get_refresh_composable()
+
+        RefreshValidator.validate(request)
+
+        http_response = flask_adapter(request, controller_handle)
+
+        refresh_token = http_response.headers.pop('refresh-token')
+
+        response  = make_response(jsonify(http_response.body), http_response.status_code)
+
+        secure = True
+
+        if DEV:
+            secure = False
+
+        response.set_cookie('refresh-token', refresh_token, httponly=True, secure=secure, max_age=EXPIRATION_TIME_REFRESH_TOKEN, path="/")
+
+        return response
+
+    except Exception as e:
+        http_response = ExceptionHandler.handle_exception(e)
+        return jsonify(http_response.body), http_response.status_code

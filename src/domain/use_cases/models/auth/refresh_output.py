@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
-class LoginOutput:
+class RefreshOutput:
     access_token: str
     refresh_token: str
 
@@ -15,6 +14,5 @@ class LoginOutput:
     redes: list[str]
 
     is_admin: bool = False
-
     can_access_sensitive_information: bool = False
     can_use_ai_agent: bool = False
