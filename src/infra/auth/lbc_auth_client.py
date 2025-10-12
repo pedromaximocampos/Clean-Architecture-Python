@@ -37,7 +37,7 @@ class LBCAuthClient(ILBCAuthClient):
         auth_response = response.json()
 
         token_auth = auth_response.get("token", None)
-        email = token_auth.get("email", None)
+        email = auth_response.get("email", None)
 
         if token_auth is None or email is None:
             raise BadRequestError("Resposta inválida da LBC Auth.")

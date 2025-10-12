@@ -8,6 +8,8 @@ from src.exceptions.api_types import DatabaseError, NotFoundError
 
 from src.infra.redis.connection import RedisProvider
 
+from src.infra.redis.mappers.serializer import Serializer
+
 import json
 
 from redis import Redis
@@ -29,15 +31,19 @@ class RedisSessionRepository(ISessionTokenRepository):
         if not redis_connection:
             raise DatabaseError("Não foi possível conectar ao Redis.")
 
+        user_profile_dict = asdict(session.user_profile)
+
+        user_profile_json = json.dumps(user_profile_dict, default=Serializer.to_primitive)
+
         redis_pipeline = self.redis_client.pipeline()
 
-        redis_pipeline.hset(token_refresh, session.id)
-        redis_pipeline.hset(token_refresh, session.name)
-        redis_pipeline.hset(token_refresh, session.email)
-        redis_pipeline.hset(token_refresh, json.dumps(session.ibms))
-        redis_pipeline.hset(token_refresh, json.dumps(session.companies))
-        redis_pipeline.hset(token_refresh, json.dumps(session.redes))
-        redis_pipeline.hset(token_refresh, json.dumps(asdict(session.user_profile)))
+        redis_pipeline.hset(token_refresh, "id",  session.id)
+        redis_pipeline.hset(token_refresh, "name", session.name)
+        redis_pipeline.hset(token_refresh, "email", session.email)
+        redis_pipeline.hset(token_refresh, "ibms", json.dumps(session.ibms))
+        redis_pipeline.hset(token_refresh, "companies", json.dumps(session.companies))
+        redis_pipeline.hset(token_refresh, "redes", json.dumps(session.redes))
+        redis_pipeline.hset(token_refresh, "user_profile", user_profile_json)
 
         tempo_de_expiracao = 60 * 60 * 24 * 30  # 30 dias em segundos
         tempo_de_expiracao += 120  # Adiciona 2 minutos extras para garantir que o token não expire exatamente no momento da verificação
@@ -65,7 +71,13 @@ class RedisSessionRepository(ISessionTokenRepository):
             raise NotFoundError("Sessão não encontrada.")
 
         user_profile = json.loads(user_data.get("user_profile"))
+        user_profile_authorized_at = user_profile.get("authorized_at", None)
+        user_profile_updated_at = user_profile.get("updated_at", None)
+        if user_profile_authorized_at is not None:
+            user_profile["authorized_at"] = Serializer.to_datetime(user_profile_authorized_at)
 
+        if user_profile_updated_at is not None:
+            user_profile["updated_at"] = Serializer.to_datetime(user_profile_updated_at)
 
         schemed_user_profile = UserProfile(
             id = user_profile.get("id"),

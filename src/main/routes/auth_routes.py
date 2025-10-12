@@ -24,7 +24,7 @@ from src.config.settings import DEV, EXPIRATION_TIME_REFRESH_TOKEN
 auth_routes_bp = Blueprint('auth_routes', __name__)
 
 
-@auth_routes_bp.route('auth/login', methods=['POST'])
+@auth_routes_bp.route('/auth/login', methods=['POST'])
 def login():
     try:
         LoginValidator.validate(request)
@@ -42,6 +42,8 @@ def login():
             secure = False
 
         response.set_cookie('refresh-token', refresh_token, httponly=True, secure=secure, max_age=EXPIRATION_TIME_REFRESH_TOKEN, path="/")
+
+        return response
 
 
     except Exception as e:

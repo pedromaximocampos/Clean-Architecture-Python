@@ -24,7 +24,7 @@ class RedisProvider:
                         password=self._settings.password,
                         decode_responses=True,
                         username='default',
-                        ssl=True
+                        ssl=self._settings.ssl
                     )
 
                 try:

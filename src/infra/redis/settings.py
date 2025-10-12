@@ -6,3 +6,4 @@ class RedisSettings:
     port: int
     password: str
     user: str
+    ssl: bool = True
