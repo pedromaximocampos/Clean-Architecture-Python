@@ -51,9 +51,8 @@ class GetPrincipalDataImpl(IGetPrincipalDataUseCase):
 
         found_in_mongo: list[PostoResumo] = self.get_postos_data(ibms_to_search, input_data.date)
 
-        # self.manage_redis_cache()
+        self.manage_redis_cache(found_in_mongo, user_principal.email)
 
-        self.principal_cache_repository.set_principal_data(found_in_mongo, user_principal.email)
 
         stations: list[PostoResumo] = cached_data + found_in_mongo
 
@@ -61,10 +60,11 @@ class GetPrincipalDataImpl(IGetPrincipalDataUseCase):
 
         return response
 
-    def manage_redis_cacha(self, found_in_mongo: list[PostoResumo], user_email: str):
-        if len(found_in_mongo) > 10:
-            # self.principal_cache_repository.clear_oldest_cache()
-            pass
+    def manage_redis_cache(self, found_in_mongo: list[PostoResumo], user_email: str):
+
+        self.principal_cache_repository.clear_cache(user_email)
+
+        self.principal_cache_repository.set_principal_data(found_in_mongo, user_email)
 
 
     def get_postos_data(self, ibms: list[str], date: datetime) -> list[PostoResumo]:
