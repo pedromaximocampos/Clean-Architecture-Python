@@ -1,5 +1,6 @@
 from os import getenv
-
+from dotenv import load_dotenv
+load_dotenv()
 
 DEV = getenv("FLASK_ENV") != "production"
 
@@ -21,7 +22,7 @@ CONST_MONGO_URL = getenv('CONST_MONGO_URL')
 CONST_DATABASE = getenv('CONST_DATABASE')
 CONST_BI_DATABASE = getenv('BI_DATABASE')
 CONST_REDIS_HOST = getenv('CONST_REDIS_HOST')
-CONST_REDIS_PORT =  int(getenv('CONST_REDIS_PORT'))
+CONST_REDIS_PORT =  int(getenv('CONST_REDIS_PORT', 6379))
 CONST_REDIS_PASSWORD = getenv('CONST_REDIS_PASSWORD')
 
 '''COLLECTIONS'''
