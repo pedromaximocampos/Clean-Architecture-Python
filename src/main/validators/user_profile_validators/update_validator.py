@@ -13,5 +13,5 @@ class UserProfileUpdateValidator:
         }
 
         v = Validator(schema)
-        if not v.validate(request):
+        if not v.validate(request.json):
             raise ValidationFailed(f"Invalid request data: {v.errors}")

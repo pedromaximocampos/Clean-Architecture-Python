@@ -1,4 +1,5 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
+from typing import Dict, Tuple
 
 from src.domain.ports.security.models.user_principal import UserPrincipal
 from src.domain.use_cases.models.principal_page import GetPrincipalInput, GetPrincipalOutput, PostoResumo, Venda, \
@@ -13,25 +14,26 @@ from src.shared.contexts.current_user import get_current_user
 
 class GetPrincipalDataImpl(IGetPrincipalDataUseCase):
 
-    def __init__(self, supplies_repository: ISuppliesRepository,
-                 daily_consolidation_repository: IDailyConsolidationRepository,
-                 principal_cache_repository: IPrincipalDataCacheRepository):
+    def __init__(self, supplies_repository: ISuppliesRepository, principal_cache_repository: IPrincipalDataCacheRepository):
         self.supplies_repository = supplies_repository
-        self.daily_consolidation_repository = daily_consolidation_repository
         self.principal_cache_repository = principal_cache_repository
 
 
     def execute(self, input_data: GetPrincipalInput) -> GetPrincipalOutput:
         user_principal: UserPrincipal = get_current_user()
-        set_input_ibms = set(input_data.ibms)
-        ibms_to_search = input_data.ibms
-
 
         if UtilsMethods.should_read_cache(input_data.date):
+            return self._run_today_use_case(input_data, user_principal)
+        else:
+            return self._run_old_date_use_case(input_data, user_principal)
 
 
+    def _run_old_date_use_case(self, input_data: GetPrincipalInput, user_principal: UserPrincipal) -> GetPrincipalOutput:
+        stations: list[PostoResumo] = self.get_postos_data(input_data.ibms, input_data.date)
 
+        response  = GetPrincipalOutput(postos=stations)
 
+        return response
 
 
     def _run_today_use_case(self, input_data: GetPrincipalInput, user_principal: UserPrincipal) -> GetPrincipalOutput:
@@ -47,51 +49,65 @@ class GetPrincipalDataImpl(IGetPrincipalDataUseCase):
             return GetPrincipalOutput(postos=cached_data)
 
 
-        sales_data: List[Dict[str, Any]] = self._fetch_and_consolidate_data(ibms_to_search, user_principal)
+        found_in_mongo: list[PostoResumo] = self.get_postos_data(ibms_to_search, input_data.date)
 
+        # self.manage_redis_cache()
 
-        today_sales = self.supplies_repository.get_supplies_by_ibms(ibms_to_search, UtilsMethods.get_today_date())
-        first_date, last_date = self.supplies_repository.find_first_and_last_sale_date()
-        consolidated_data = self.daily_consolidation_repository.get_consolidated_data_by_ibms_and_date_range(ibms_to_search, first_date, last_date)
+        self.principal_cache_repository.set_principal_data(found_in_mongo, user_principal.email)
 
-        postos_resumo: list[PostoResumo] = []
+        stations: list[PostoResumo] = cached_data + found_in_mongo
 
-        for ibm in ibms_to_search:
-            posto_sales = [sale for sale in today_sales if sale.ibm == ibm]
-            posto_consolidated = [data for data in consolidated_data if data.ibm == ibm]
+        response  = GetPrincipalOutput(postos=stations)
 
-            posto_resumo = PostoResumo(
-                ibm=ibm,
-                vendas=posto_sales,
-                consolidado=posto_consolidated
-            )
+        return response
 
-            postos_resumo.append(posto_resumo)
-
-        self.principal_cache_repository.save_principal_data(postos_resumo, user_principal.email)
-
-        return postos_resumo
+    def manage_redis_cacha(self, found_in_mongo: list[PostoResumo], user_email: str):
+        if len(found_in_mongo) > 10:
+            # self.principal_cache_repository.clear_oldest_cache()
+            pass
 
 
     def get_postos_data(self, ibms: list[str], date: datetime) -> list[PostoResumo]:
-        past_week_sales: list[Venda] = self.supplies_repository.get_supplies_by_ibms(ibms,
-                                                                                    date - timedelta(
-                                                                                         days=7))
 
-        week_sales: list[Venda] = self.supplies_repository.get_supplies_by_ibms(ibms, date)
+        sales_data: Dict[str, Tuple[Venda, Venda]] = self.supplies_repository.get_supplies_by_ibms(ibms, date)
 
-        past_week_map = {venda.ibm: venda for venda in past_week_sales}
-        week_map = {venda.ibm: venda for venda in week_sales}
+        postos: list[PostoResumo] = []
+        for ibm, sales_data in sales_data.items():
+            past_week_sales: Venda = sales_data[0]
+            date_of_interest_sales: Venda = sales_data[1]
+            lista_venda : list[Venda] = [past_week_sales, date_of_interest_sales]
 
-        list_postos: list[PostoResumo] = []
-
-        for key, past_week_venda in past_week_map:
-            week_map_sales = week_map.get(key)
-
-            variation = Variacao(
-                valor= UtilsMethods.calculate_variation(past_week_venda.valor, week_map_sales.valor),
+            variation: Variacao = GetPrincipalDataImpl._calculate_variation(sales_data)
+            posto_resumo = PostoResumo(
+                ibm=ibm,
+                vendas=lista_venda,
+                variacao=variation,
+                primeiro_abastecimento=date_of_interest_sales.primeiro_abastecimento,
+                ultimo_abastecimento=date_of_interest_sales.ultimo_abastecimento,
             )
+            postos.append(posto_resumo)
+
+        return postos
 
 
 
+    @staticmethod
+    def _calculate_variation(sales_data: tuple[Venda, Venda]) -> Variacao:
+
+        past_week_sales, date_of_interest_sales = sales_data
+
+        variation = Variacao(
+            abastecimentos=UtilsMethods.calculate_variation(date_of_interest_sales.abastecimentos, past_week_sales.abastecimentos),
+            custo=UtilsMethods.calculate_variation(date_of_interest_sales.custo, past_week_sales.custo),
+            lucro=UtilsMethods.calculate_variation(date_of_interest_sales.lucro, past_week_sales.lucro),
+            valor=UtilsMethods.calculate_variation(date_of_interest_sales.valor, past_week_sales.valor),
+            volume=UtilsMethods.calculate_variation(date_of_interest_sales.volume, past_week_sales.volume),
+            lpl=UtilsMethods.calculate_variation(date_of_interest_sales.lpl, past_week_sales.lpl),
+            ppl=UtilsMethods.calculate_variation(date_of_interest_sales.ppl, past_week_sales.ppl),
+            cpl=UtilsMethods.calculate_variation(date_of_interest_sales.cpl, past_week_sales.cpl),
+            ticketMedioValor=UtilsMethods.calculate_variation(date_of_interest_sales.ticketMedioValor, past_week_sales.ticketMedioValor),
+            ticketMedioVolume=UtilsMethods.calculate_variation(date_of_interest_sales.ticketMedioVolume, past_week_sales.ticketMedioVolume)
+        )
+
+        return variation
 

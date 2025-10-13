@@ -30,6 +30,8 @@ class TestMongoSuppliesRepository:
 
 
 
+
+
     def test_get_supplies_salles_new_pipeline(self, mongo_supply_repository: MongoSuppliesRepository):
 
         date = datetime.fromisoformat("2025-10-12T23:35:04.997Z") - timedelta(hours=3, minutes=3)
@@ -47,4 +49,8 @@ class TestMongoSuppliesRepository:
 
         results = mongo_supply_repository.get_supplies_by_ibms(ibms, date)
 
+        for ibm, sales in results.items():
+            print(f"IBM: {ibm} - Sales Count: {len(sales)}")
+            print(f"tipo de sales é: {type(sales)}")
+            pprint(sales)
         pprint(results)

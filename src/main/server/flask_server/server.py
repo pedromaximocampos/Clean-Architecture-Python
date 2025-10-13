@@ -1,10 +1,14 @@
 from flask import Flask
 
-from src.main.adapters.flask_adapter.flask_auth_guard_adapter import FlaskAuthGuardAdapter
+# Routes
 from src.main.routes.user_profile_routes import user_profile_routes_bp
 from src.main.routes.auth_routes import auth_routes_bp
+from src.main.routes.principal_routes import principal_route_bp
+
+# User Context
 from src.shared.contexts.current_user import clear_current_user
 
+# Security composable
 from src.main.composables.security.flask_guard_composable import create_flask_guard_composable
 
 
@@ -43,3 +47,4 @@ def register_lifecycle_events(app: Flask):
 def register_blueprints(app: Flask):
     app.register_blueprint(user_profile_routes_bp)
     app.register_blueprint(auth_routes_bp)
+    app.register_blueprint(principal_route_bp)

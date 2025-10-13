@@ -1,8 +1,11 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from bson import ObjectId
+from zoneinfo import ZoneInfo
+
 
 
 class UtilsMethods:
+
     
     @staticmethod
     def now_utc() -> datetime:
@@ -36,3 +39,26 @@ class UtilsMethods:
             return round((((field1 * 100) / field2) - 100), 2)
         else:
             return 0.0
+
+
+    @staticmethod
+    def check_data(date: datetime | None = None) -> datetime:
+        if date is None:
+            today = datetime.now(timezone.utc).replace(second=0, microsecond=0) - timedelta(hours=3, minutes=3,
+                                                                                            seconds=0)
+            return today
+        else:
+            today_date = datetime.now()
+
+            date = date.astimezone(timezone.utc)
+
+            if today_date.date() > date.date():
+                return date.replace(hour=0, minute=0, second=0, microsecond=0)
+            else:
+                return date - timedelta(hours=3, minutes=3, seconds=0)
+
+
+    @staticmethod
+    def convert_date_from_isoformat(date_str: str) -> datetime:
+        date = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+        return date

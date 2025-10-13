@@ -18,6 +18,24 @@ class Variacao:
     ticketMedioValor: float
     ticketMedioVolume: float
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "Variacao":
+        return cls(
+            abastecimentos=data["abastecimentos"],
+            custo=data["custo"],
+            lucro=data["lucro"],
+            valor=data["valor"],
+            volume=data["volume"],
+            lpl=data["lpl"],
+            ppl=data["ppl"],
+            cpl=data["cpl"],
+            ticketMedioValor=data["ticketMedioValor"],
+            ticketMedioVolume=data["ticketMedioVolume"],
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
 
 
 
@@ -44,7 +62,29 @@ class Venda:
     ticketMedioCusto: Optional[float] = 0.0
     # primeiros e ultimos
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "Venda":
+        return cls(
+            ibm=data["ibm"],
+            data=data["data"],
+            abastecimentos=data["abastecimentos"],
+            lucro=data["lucro"],
+            custo=data["custo"],
+            valor=data["valor"],
+            volume=data["volume"],
+            lpl=data["lpl"],
+            ppl=data["ppl"],
+            cpl=data["cpl"],
+            ticketMedioValor=data["ticketMedioValor"],
+            ticketMedioVolume=data["ticketMedioVolume"],
+            primeiro_abastecimento=data.get("primeiro_abastecimento"),
+            ultimo_abastecimento=data.get("ultimo_abastecimento"),
+            ticketMedioLucro=data.get("ticketMedioLucro", 0.0),
+            ticketMedioCusto=data.get("ticketMedioCusto", 0.0),
+        )
 
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
 
 
 
@@ -69,9 +109,9 @@ class PostoResumo:
             ultimo_abastecimento=data["ultimo_abastecimento"],
             variacao=Variacao.from_dict(data["variacao"]),
             vendas=[Venda.from_dict(v) for v in data["vendas"]],
-            cnpj=data.get("cnpj") or None,
-            nome=data.get("nome") or None,
-            rede=data.get("rede") or None,
+            cnpj=data.get("cnpj") or "",
+            nome=data.get("nome") or "",
+            rede=data.get("rede") or "",
         )
 
 
@@ -79,6 +119,9 @@ class PostoResumo:
     def from_json(cls, json_str: str) -> "PostoResumo":
         return cls.from_dict(json.loads(json_str))
 
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
 
 
 @dataclass(slots=True)

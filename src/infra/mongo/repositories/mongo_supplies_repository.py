@@ -11,25 +11,48 @@ from src.infra.mongo.connection import MongoDBProvider
 
 class MongoSuppliesRepository(ISuppliesRepository):
 
-    # _COLL_NAME = CONST_ABASTECIMENTOS_COLLECTION
-    _COLL_NAME = "Abastecimentos"
+    _COLL_NAME = CONST_ABASTECIMENTOS_COLLECTION
 
     def __init__(self, mongo_provider: MongoDBProvider) -> None:
-        self._db = mongo_provider.get_db()
         self._collection = mongo_provider.get_collection(self._COLL_NAME)
 
+    @staticmethod
+    def return_dates(date: datetime) -> Tuple[datetime, datetime]:
+        start_date: datetime = date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = date
+
+        # data antiga estou recebendo zerado, tenho que pegar o dia por completo
+        if date.date() < datetime.now().date():
+            end_date = date.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+        return start_date, end_date
+
     def get_supplies_by_ibms(self, ibms: list[str], date: datetime) -> Dict[str, Tuple[Venda, Venda]]:
-        pipeline = self.__supplies_pipeline(ibms, date)
-        results = list(self._db.aggregate(pipeline))
+        start_date, end_date = MongoSuppliesRepository.return_dates(date)
+
+        prev_week_start :datetime = start_date - timedelta(days=7)
+        prev_week_end: datetime = end_date - timedelta(days=7)
+
+        pipeline = MongoSuppliesRepository.__supplies_pipeline(ibms, start_date, end_date, prev_week_start, prev_week_end)
+
+        results = list(self._collection.aggregate(pipeline))
+
+        by_ibm = {doc["ibm"]: {v["periodo"]: v for v in doc.get("vendas", [])}for doc in results}
 
         out: Dict[str, Tuple[Venda, Venda]] = {}
 
-        for result in results:
-            ibm = result['ibm']
-            vendas_by_period = {v['periodo']: v for v in result['vendas']}
-            semana = self._to_venda(ibm, vendas_by_period['semana_passada'])
-            atual = self._to_venda(ibm, vendas_by_period['atual'])
-            out[ibm] = (semana, atual)
+        for ibm in ibms:
+            vendas_by_period = by_ibm.get(ibm, {})
+
+            semana_doc = vendas_by_period.get("semana_passada") or MongoSuppliesRepository._default_doc(
+                ibm, "semana_passada", prev_week_start, prev_week_end
+            )
+            atual_doc = vendas_by_period.get("atual") or MongoSuppliesRepository._default_doc(
+                ibm, "atual", start_date, end_date
+            )
+
+            out[ibm] = (MongoSuppliesRepository._to_venda(ibm, semana_doc, prev_week_start),
+                        MongoSuppliesRepository._to_venda(ibm, atual_doc, start_date))
 
         return out
 
@@ -37,112 +60,123 @@ class MongoSuppliesRepository(ISuppliesRepository):
     def find_first_and_last_sale_date(self) -> tuple[datetime, datetime]:
         pass
 
-    def __supplies_pipeline(self,ibms: List[str], date: datetime) -> List[Dict[str, Any]]:
-        # Referências de tempo
-        date_start = date.replace(hour=0, minute=0, second=0, microsecond=0)
-        date_end = date
-        past_week_start = date_start - timedelta(days=7)
-        past_week_end = date_end - timedelta(days=7)
+    @staticmethod
+    def __supplies_pipeline(ibms: List[str], current_week_start: datetime, current_week_end:  datetime,
+                            prev_week_start: datetime, prev_week_end: datetime) -> List[Dict[str, Any]]:
+        """
+            Retorna dados de duas semanas:
+            - Semana passada (D-7): 00:00:00 até mesmo horário de 'date'
+            - Semana atual (D-0): 00:00:00 até horário de 'date'
+            """
+        #  SEMANA ATUAL: D-0 00:00:00 até date (horário atual)
 
-        seed = [{"ibm": i} for i in ibms]
 
-        # Sub-pipeline comum com melhor uso de índice:
-        # 1º $match com filtros fixos (aproveita índices)
-        # 2º $match com $expr para vincular $$ibm
-        def lookup_pipeline(period_start, period_end):
-            return [
-                {"$match": {
-                    "dtHr": {"$gte": period_start, "$lte": period_end},
-                    "ori": {"$in": ["0", "1", "5"]},
-                    "sig": {"$ne": None},
-                    "lmc": {"$ne": None}
-                }},
-                {"$match": {"$expr": {"$eq": ["$ibm", "$$ibm"]}}},
-                {"$set": {
-                    "cusDbl": {"$convert": {"input": "$cus", "to": "double", "onError": 0, "onNull": 0}},
-                    "volDbl": {"$convert": {"input": "$vol", "to": "double", "onError": 0, "onNull": 0}},
-                    "valDbl": {"$convert": {"input": "$val", "to": "double", "onError": 0, "onNull": 0}}
-                }},
-                {"$set": {
-                    "cost": {"$multiply": ["$cusDbl", "$volDbl"]},
-                    "profit": {"$subtract": ["$valDbl", "$cost"]}
-                }},
-                {"$group": {
-                    "_id": None,
-                    "pAbst": {"$min": "$dtHr"},
-                    "uAbst": {"$max": "$dtHr"},
-                    "nAbst": {"$sum": 1},
-                    "tVol": {"$sum": "$volDbl"},
-                    "tVal": {"$sum": "$valDbl"},
-                    "tCost": {"$sum": "$cost"},
-                    "tProfit": {"$sum": "$profit"}
-                }},
-                {"$project": {"_id": 0, "pAbst": 1, "uAbst": 1, "nAbst": 1, "tVol": 1, "tVal": 1, "tCost": 1,
-                              "tProfit": 1}}
-            ]
 
-        return [
-            {"$documents": seed},
+        # ✅ STAGES REUTILIZÁVEIS
+        convert_stage = {
+            "$set": {
+                "cusDbl": {"$convert": {"input": "$cus", "to": "double", "onError": 0, "onNull": 0}},
+                "volDbl": {"$convert": {"input": "$vol", "to": "double", "onError": 0, "onNull": 0}},
+                "valDbl": {"$convert": {"input": "$val", "to": "double", "onError": 0, "onNull": 0}},
+            }
+        }
 
-            # Hoje (dia de interesse) [today_start, next_day_start)
-            {"$lookup": {
-                "from": self._COLL_NAME,
-                "let": {"ibm": "$ibm"},
-                "pipeline": lookup_pipeline(date_start, date_end),
-                "as": "hoje"
-            }},
+        cost_stage = {"$set": {"cost": {"$multiply": ["$cusDbl", "$volDbl"]}}}
+        profit_stage = {"$set": {"profit": {"$subtract": ["$valDbl", "$cost"]}}}
 
-            # Semana passada [last_week_start, today_start)
-            {"$lookup": {
-                "from": self._COLL_NAME,
-                "let": {"ibm": "$ibm"},
-                "pipeline": lookup_pipeline(past_week_start, past_week_end),
-                "as": "ultSemana"
-            }},
+        group_stage = {
+            "$group": {
+                "_id": "$ibm",
+                "pAbst": {"$min": "$dtHr"},
+                "uAbst": {"$max": "$dtHr"},
+                "nAbst": {"$sum": 1},
+                "tVol": {"$sum": "$volDbl"},
+                "tVal": {"$sum": "$valDbl"},
+                "tCost": {"$sum": "$cost"},
+                "tProfit": {"$sum": "$profit"},
+            }
+        }
 
-            # Zera quando faltar
-            {"$set": {
-                "vendaHoje": {
-                    "$ifNull": [
-                        {"$first": "$hoje"},
-                        {"pAbst": None, "uAbst": None, "nAbst": 0, "tVol": 0, "tVal": 0, "tCost": 0, "tProfit": 0}
-                    ]
-                },
-                "vendaUltSemana": {
-                    "$ifNull": [
-                        {"$first": "$ultSemana"},
-                        {"pAbst": None, "uAbst": None, "nAbst": 0, "tVol": 0, "tVal": 0, "tCost": 0, "tProfit": 0}
-                    ]
-                }
-            }},
-
-            # Saída final
-            {"$project": {
+        project_after_group = {
+            "$project": {
                 "_id": 0,
-                "ibm": 1,
-                "vendas": [
-                    {"$mergeObjects": [
-                        {"periodo": "semana_passada", "dataInicio": past_week_start,
-                         "dataFim": past_week_end},
-                        "$vendaUltSemana"
-                    ]},
-                    {"$mergeObjects": [
-                        {"periodo": "atual", "dataInicio": date_start, "dataFim": date_end},
-                        "$vendaHoje"
-                    ]}
-                ]
-            }}
+                "ibm": "$_id",
+                "pAbst": 1,
+                "uAbst": 1,
+                "nAbst": 1,
+                "tVol": 1,
+                "tVal": 1,
+                "tCost": 1,
+                "tProfit": 1,
+                "periodo": 1,
+            }
+        }
+
+        pipeline =  [
+            # 1) MATCH inicial (atenção: confira se 'lmc' é o campo certo; se for 'lmv', ajuste)
+            {
+                "$match": {
+                    "ibm": {"$in": ibms},
+                    "sig": {"$exists": True},
+                    "lmc": {"$exists": True},
+                    "ori": {"$in": ["0", "1", "5"]},
+                    "dtHr": {"$gte": prev_week_start, "$lte": current_week_end}
+                }
+            },
+
+            # 2) conversões e métricas
+            convert_stage,
+            cost_stage,
+            profit_stage,
+
+            # 3) facet por janelas
+            {
+                "$facet": {
+                    "atual": [
+                        {"$match": {"dtHr": {"$gte": current_week_start, "$lte": current_week_end}}},
+                        group_stage,
+                        {"$addFields": {"periodo": "atual"}},
+                        project_after_group,
+                    ],
+                    "semana_passada": [
+                        {"$match": {"dtHr": {"$gte": prev_week_start, "$lte": prev_week_end}}},
+                        group_stage,
+                        {"$addFields": {"periodo": "semana_passada"}},
+                        project_after_group,
+                    ],
+                }
+            },
+
+            # 4) concatena as janelas e mantém só quem tem pelo menos uma
+            {"$project": {"all": {"$concatArrays": ["$atual", "$semana_passada"]}}},
+            {"$unwind": "$all"},
+            {"$group": {"_id": "$all.ibm", "vendas": {"$push": "$all"}}},
+
+            # 5) shape final
+            {"$project": {"_id": 0, "ibm": "$_id", "vendas": 1}},
         ]
 
-    def _to_venda(self, ibm: str, venda: dict) -> Venda:
+        return pipeline
+
+    @staticmethod
+    def _to_venda(ibm: str, venda: dict, date: datetime) -> Venda:
         n = venda['nAbst']
         vol = venda['tVol']
         val = venda['tVal']
         cost = venda['tCost']
         profit = venda['tProfit']
+
+        primeiro_abastecimento = venda.get('pAbst')
+        ultimo_abastecimento = venda.get('uAbst')
+
+        if primeiro_abastecimento is not None and isinstance(primeiro_abastecimento, datetime):
+            primeiro_abastecimento.strftime("%H:%M")
+
+        if ultimo_abastecimento is not None and isinstance(ultimo_abastecimento, datetime):
+            ultimo_abastecimento.strftime("%H:%M")
         return Venda(
             ibm=ibm,
-            data=venda['dataFim'].date(),
+            data=str(date.date()),
             abastecimentos=n,
             volume=vol,
             valor=val,
@@ -155,7 +189,23 @@ class MongoSuppliesRepository(ISuppliesRepository):
             ticketMedioVolume=(vol / n) if n > 0 else 0.0,
             ticketMedioLucro=(profit / n) if n > 0 else 0.0,
             ticketMedioCusto=(cost / n) if n > 0 else 0.0,
-            primeiro_abastecimento=venda.get('pAbst'),
-            ultimo_abastecimento=venda.get('uAbst'),
+            primeiro_abastecimento=str(primeiro_abastecimento),
+            ultimo_abastecimento=str(ultimo_abastecimento),
         )
 
+    @staticmethod
+    def _default_doc( ibm: str, periodo: str, di: datetime, df: datetime) -> dict:
+        # Doc “cru” no mesmo formato que sai do Mongo antes do _to_venda
+        return {
+            "periodo": periodo,
+            "dataInicio": di,
+            "dataFim": df,
+            "pAbst": None,
+            "uAbst": None,
+            "nAbst": 0,
+            "tVol": 0.0,
+            "tVal": 0.0,
+            "tCost": 0.0,
+            "tProfit": 0.0,
+            "ibm": ibm,
+        }

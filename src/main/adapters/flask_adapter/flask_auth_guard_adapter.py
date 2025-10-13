@@ -29,18 +29,18 @@ class FlaskAuthGuardAdapter:
             return
 
         access_token = request.headers.get('token')
-        refresh_token = request.cookies.get('refresh_token')
+        refresh_token = request.cookies.get('refresh-token')
 
         if not access_token or not refresh_token:
             clear_current_user()
-            raise AuthError
+            abort(401, description="Access token or refresh token is missing.")
 
         try:
             principal: UserPrincipal = self.auth_guard.authenticate(access_token, refresh_token)
             set_current_user(principal)
         except Exception:
             clear_current_user()
-            raise AuthError
+            abort(401, description="Invalid access token")
 
 
     def after_request(self, response):
